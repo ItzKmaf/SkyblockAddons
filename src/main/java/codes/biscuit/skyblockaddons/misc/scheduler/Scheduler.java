@@ -62,7 +62,7 @@ public class Scheduler {
 
             if (entry.getValue().removeIf(command -> CommandType.SHOW_FULL_INVENTORY_WARNING.equals(command.commandType))) {
                 resetTitleFeatureTicks.add(entry.getKey() + main.getConfigValues().getWarningSeconds() * 20);
-                main.getLogger().debug("Full Inventory Warning Task Removed!");
+                main.getLogger().debug("Full Inventory Title Task Removed!");
             }
 
             // Remove the corresponding reset title feature command.
@@ -74,7 +74,7 @@ public class Scheduler {
                     Command command = commandIterator.next();
                     if (command.commandType.equals(CommandType.RESET_TITLE_FEATURE)) {
                         commandIterator.remove();
-                        main.getLogger().debug("Full Inventory Warning Reset Task Removed!");
+                        main.getLogger().debug("Full Inventory Title Reset Task Removed!");
                         break;
                     }
                 }
@@ -180,9 +180,13 @@ public class Scheduler {
                     main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, 10 + main.getConfigValues().getWarningSeconds());
                 }
             } else if (this == RESET_TITLE_FEATURE) {
-                main.getRenderListener().setTitleFeature(null);
+                //TODO
+                // Try to find a way to clear the title without using 'force'
+                main.getRenderListener().clearTitle(null, true);
             } else if (this == RESET_SUBTITLE_FEATURE) {
-                main.getRenderListener().setSubtitleFeature(null);
+                //TODO
+                // Try to find a way to clear the title without using 'force'
+                main.getRenderListener().clearTitle(null, true);
             } else if (this == ERASE_UPDATE_MESSAGE) {
                 main.getRenderListener().setUpdateMessageDisplayed(true);
             } else if (this == SET_LAST_SECOND_HEALTH) {

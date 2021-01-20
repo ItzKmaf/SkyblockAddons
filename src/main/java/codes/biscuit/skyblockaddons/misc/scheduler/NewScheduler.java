@@ -65,7 +65,7 @@ public class NewScheduler {
     /**
      * Repeats a task (synchronously) every tick.<br><br>
      *
-     * Warning: This method is ran on the main thread, don't do anything heavy.
+     * Title: This method is ran on the main thread, don't do anything heavy.
      * @param task The task to run.
      * @return The scheduled task.
      */

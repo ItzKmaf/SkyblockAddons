@@ -73,7 +73,7 @@ public class SkyblockAddons {
     public SkyblockAddons() {
         instance = this;
         logger = LogManager.getLogger();
-
+        
         playerListener = new PlayerListener();
         guiScreenListener = new GuiScreenListener();
         renderListener = new RenderListener();

@@ -212,7 +212,7 @@ public class InventoryUtils {
      */
     public void showFullInventoryWarning() {
         main.getUtils().playLoudSound("random.orb", 0.5);
-        main.getRenderListener().setTitleFeature(Feature.FULL_INVENTORY_WARNING);
+        main.getRenderListener().setDisplayedTitle(main.getPlayerListener().getFULL_INVENTORY_WARNING());
     }
 
     /**

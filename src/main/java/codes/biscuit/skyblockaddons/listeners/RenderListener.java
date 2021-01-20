@@ -18,6 +18,7 @@ import codes.biscuit.skyblockaddons.gui.LocationEditGui;
 import codes.biscuit.skyblockaddons.gui.SettingsGui;
 import codes.biscuit.skyblockaddons.gui.SkyblockAddonsGui;
 import codes.biscuit.skyblockaddons.gui.buttons.ButtonLocation;
+import codes.biscuit.skyblockaddons.gui.titles.Title;
 import codes.biscuit.skyblockaddons.misc.ChromaManager;
 import codes.biscuit.skyblockaddons.misc.Updater;
 import codes.biscuit.skyblockaddons.misc.scheduler.Scheduler;
@@ -83,13 +84,8 @@ public class RenderListener {
     @Getter @Setter private boolean predictMana;
 
     @Setter private boolean updateMessageDisplayed;
-
-    private Feature subtitleFeature;
-    @Getter @Setter private Feature titleFeature;
-
-    @Setter private int arrowsLeft;
-
-    @Setter private String cannotReachMobName;
+    
+    private Title displayedTitle;
 
     @Setter private long skillFadeOutTime = -1;
     @Setter private EnumUtils.SkillType skill;
@@ -109,7 +105,7 @@ public class RenderListener {
             if (e.type == RenderGameOverlayEvent.ElementType.EXPERIENCE || e.type == RenderGameOverlayEvent.ElementType.JUMPBAR) {
                 if (main.getUtils().isOnSkyblock()) {
                     renderOverlays();
-                    renderWarnings(e.resolution);
+                    renderDisplayedTitle(e.resolution);
                 } else {
                     renderTimersOnly();
                 }
@@ -128,7 +124,7 @@ public class RenderListener {
         if (e.type == null && main.isUsingLabymod()) {
             if (main.getUtils().isOnSkyblock()) {
                 renderOverlays();
-                renderWarnings(e.resolution);
+                renderDisplayedTitle(e.resolution);
             } else {
                 renderTimersOnly();
             }
@@ -187,110 +183,109 @@ public class RenderListener {
             }
         }
     }
-
+    
     /**
-     * This renders all the title/subtitle warnings from features.
+     * Displays a Title and/or subtitle on the players screen.
+     * @see codes.biscuit.skyblockaddons.gui.titles.Title
+     * @param scaledResolution the scaled resolution to rescale the size for different sized screens.
      */
-    private void renderWarnings(ScaledResolution scaledResolution) {
+    private void renderDisplayedTitle(ScaledResolution scaledResolution) {
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.theWorld == null || mc.thePlayer == null || !main.getUtils().isOnSkyblock()) {
+        if (mc.theWorld == null || mc.thePlayer == null || !main.getUtils().isOnSkyblock() || displayedTitle == null) {
             return;
         }
 
         int scaledWidth = scaledResolution.getScaledWidth();
         int scaledHeight = scaledResolution.getScaledHeight();
-        if (titleFeature != null) {
+            
+            
+        if (displayedTitle.getTitle() != null) {
+            String text = displayedTitle.getTitle();
+            int stringWidth = mc.fontRendererObj.getStringWidth(text);
 
-            Message message = null;
-            switch (titleFeature) {
-                case MAGMA_WARNING:
-                    message = Message.MESSAGE_MAGMA_BOSS_WARNING;
-                    break;
-                case FULL_INVENTORY_WARNING:
-                    message = Message.MESSAGE_FULL_INVENTORY;
-                    break;
-                case SUMMONING_EYE_ALERT:
-                    message = Message.MESSAGE_SUMMONING_EYE_FOUND;
-                    break;
-                case SPECIAL_ZEALOT_ALERT:
-                    message = Message.MESSAGE_SPECIAL_ZEALOT_FOUND;
-                    break;
-                case LEGENDARY_SEA_CREATURE_WARNING:
-                    message = Message.MESSAGE_LEGENDARY_SEA_CREATURE_WARNING;
-                    break;
-                case BOSS_APPROACH_ALERT:
-                    message = Message.MESSAGE_BOSS_APPROACH_ALERT;
-                    break;
+            float scale = 4; // Scale is normally 4, but if its larger than the screen, scale it down...
+            if (stringWidth*scale > (scaledWidth*0.9F)) {
+                scale = (scaledWidth*0.9F)/(float)stringWidth;
             }
-            if (message != null) {
-                String text = message.getMessage();
-                int stringWidth = mc.fontRendererObj.getStringWidth(text);
 
-                float scale = 4; // Scale is normally 4, but if its larger than the screen, scale it down...
-                if (stringWidth*scale > (scaledWidth*0.9F)) {
-                    scale = (scaledWidth*0.9F)/(float)stringWidth;
-                }
+            GlStateManager.pushMatrix();
+            GlStateManager.translate((float) (scaledWidth / 2), (float) (scaledHeight / 2), 0.0F);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(scale, scale, scale); // TODO Check if changing this scale breaks anything...
 
-                GlStateManager.pushMatrix();
-                GlStateManager.translate((float) (scaledWidth / 2), (float) (scaledHeight / 2), 0.0F);
-                GlStateManager.enableBlend();
-                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-                GlStateManager.pushMatrix();
-                GlStateManager.scale(scale, scale, scale); // TODO Check if changing this scale breaks anything...
+            ChromaManager.renderingText(displayedTitle.getOwner());
+            mc.fontRendererObj.drawString(text, (float) (-mc.fontRendererObj.getStringWidth(text) / 2), -20.0F,
+                    main.getConfigValues().getColor(displayedTitle.getOwner()).getRGB(), true);
+            ChromaManager.doneRenderingText();
 
-                ChromaManager.renderingText(titleFeature);
-                mc.fontRendererObj.drawString(text, (float) (-mc.fontRendererObj.getStringWidth(text) / 2), -20.0F, main.getConfigValues().getColor(titleFeature).getRGB(), true);
-                ChromaManager.doneRenderingText();
-
-                GlStateManager.popMatrix();
-                GlStateManager.popMatrix();
-            }
+            GlStateManager.popMatrix();
+            GlStateManager.popMatrix();
         }
-        if (subtitleFeature != null) {
-            Message message = null;
-            switch (subtitleFeature) {
-                case MINION_STOP_WARNING:
-                    message = Message.MESSAGE_MINION_CANNOT_REACH;
-                    break;
-                case MINION_FULL_WARNING:
-                    message = Message.MESSAGE_MINION_IS_FULL;
-                    break;
-                case NO_ARROWS_LEFT_ALERT:
-                    message = Message.MESSAGE_NO_ARROWS_LEFT;
-                    break;
+        if (displayedTitle.getSubTitle() != null) {
+            String text = displayedTitle.getSubTitle();
+            int stringWidth = mc.fontRendererObj.getStringWidth(text);
+
+            float scale = 2; // Scale is normally 2, but if its larger than the screen, scale it down...
+            if (stringWidth*scale > (scaledWidth*0.9F)) {
+                scale = (scaledWidth*0.9F)/(float)stringWidth;
             }
-            if (message != null) {
-                String text;
-                if (message == Message.MESSAGE_MINION_CANNOT_REACH) {
-                    text = message.getMessage(cannotReachMobName);
-                } else if (message == Message.MESSAGE_NO_ARROWS_LEFT && arrowsLeft != -1) {
-                    text = Message.MESSAGE_ONLY_FEW_ARROWS_LEFT.getMessage(Integer.toString(arrowsLeft));
-                } else {
-                    text = message.getMessage();
-                }
-                int stringWidth = mc.fontRendererObj.getStringWidth(text);
 
-                float scale = 2; // Scale is normally 2, but if its larger than the screen, scale it down...
-                if (stringWidth*scale > (scaledWidth*0.9F)) {
-                    scale = (scaledWidth*0.9F)/(float)stringWidth;
-                }
+            GlStateManager.pushMatrix();
+            GlStateManager.translate((float) (scaledWidth / 2), (float) (scaledHeight / 2), 0.0F);
+            GlStateManager.enableBlend();
+            GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(scale, scale, scale);  // TODO Check if changing this scale breaks anything...
 
-                GlStateManager.pushMatrix();
-                GlStateManager.translate((float) (scaledWidth / 2), (float) (scaledHeight / 2), 0.0F);
-                GlStateManager.enableBlend();
-                GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
-                GlStateManager.pushMatrix();
-                GlStateManager.scale(scale, scale, scale);  // TODO Check if changing this scale breaks anything...
+            ChromaManager.renderingText(displayedTitle.getOwner());
+            mc.fontRendererObj.drawString(text, -mc.fontRendererObj.getStringWidth(text) / 2F, -23.0F,
+                    main.getConfigValues().getColor(displayedTitle.getOwner()).getRGB(), true);
+            ChromaManager.doneRenderingText();
 
-                ChromaManager.renderingText(subtitleFeature);
-                mc.fontRendererObj.drawString(text, -mc.fontRendererObj.getStringWidth(text) / 2F, -23.0F,
-                        main.getConfigValues().getColor(subtitleFeature).getRGB(), true);
-                ChromaManager.doneRenderingText();
-
-                GlStateManager.popMatrix();
-                GlStateManager.popMatrix();
-            }
+            GlStateManager.popMatrix();
+            GlStateManager.popMatrix();
         }
+    }
+    
+    /**
+     * Sets the current title that will be displayed to the user
+     * @param title The current title that is to be displayed
+     */
+    public void setDisplayedTitle(Title title) {
+        if (title != null) {
+            this.displayedTitle = title;
+        }
+    }
+    
+    /**
+     * Ensures that the correct Title is removed (Helps to stop titles being cleared by accident)
+     * @param title The current title that is to be removed
+     * @param force Bypass checking if the correct title is being removed.
+     */
+    public void clearTitle(Title title, boolean force) {
+        if (displayedTitle == null) {
+            return;
+        }
+        if (force) {
+            this.displayedTitle = null;
+            return;
+        }
+        if (title.getClass() == displayedTitle.getClass()) {
+            this.displayedTitle = null;
+        }
+    }
+    
+    /**
+     * Returns the name of the Title currently being displayed
+     * @return The name of title displayed or Null if there isn't a title currently displayed
+     */
+    public String getDisplayedTitle() {
+        if (displayedTitle == null) {
+            return null;
+        }
+        return displayedTitle.getName();
     }
 
     /**
@@ -1445,10 +1440,6 @@ public class RenderListener {
     public void setGuiToOpen(EnumUtils.GUIType guiToOpen, int page, EnumUtils.GuiTab tab, Feature feature) {
         setGuiToOpen(guiToOpen,page,tab);
         guiFeatureToOpen = feature;
-    }
-
-    public void setSubtitleFeature(Feature subtitleFeature) {
-        this.subtitleFeature = subtitleFeature; // TODO: check, does this break anything? (arrow)
     }
 
     private ItemStack getNetherStar() {

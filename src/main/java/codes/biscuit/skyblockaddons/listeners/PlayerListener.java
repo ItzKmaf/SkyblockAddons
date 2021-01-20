@@ -16,6 +16,7 @@ import codes.biscuit.skyblockaddons.features.cooldowns.CooldownManager;
 import codes.biscuit.skyblockaddons.features.powerorbs.PowerOrbManager;
 import codes.biscuit.skyblockaddons.features.tabtimers.TabEffectManager;
 import codes.biscuit.skyblockaddons.gui.IslandWarpGui;
+import codes.biscuit.skyblockaddons.gui.titles.*;
 import codes.biscuit.skyblockaddons.misc.scheduler.Scheduler;
 import codes.biscuit.skyblockaddons.misc.scheduler.SkyblockRunnable;
 import codes.biscuit.skyblockaddons.utils.*;
@@ -84,6 +85,18 @@ public class PlayerListener {
     private static final Pattern MINION_CANT_REACH_PATTERN = Pattern.compile("§cI can't reach any (?<mobName>[A-Za-z]*)(?:s)");
     private static final Pattern ACCESSORY_BAG_REFORGE_PATTERN = Pattern.compile("You applied the (?<reforge>\\w+) reforge to (?:\\d+) accessories in your Accessory Bag!");
 
+    //TODO Put these somewhere that makes sense
+    @Getter private final FullInventoryWarning FULL_INVENTORY_WARNING = new FullInventoryWarning();
+    @Getter private final BossApproachAlert BOSS_APPROACH_ALERT = new BossApproachAlert();
+    private final MagmaWarning MAGMA_WARNING = new MagmaWarning();
+    private final MinionFullWarning MINION_FULL_WARNING = new MinionFullWarning();
+    private final MinionStopWarning MINION_STOP_WARNING = new MinionStopWarning();
+    private final NoArrowsLeftAlert NO_ARROWS_LEFT_ALERT = new NoArrowsLeftAlert();
+    private final FewArrowsLeftAlert FEW_ARROWS_LEFT_ALERT = new FewArrowsLeftAlert();
+    private final LegendarySeaCreatureWarning LEGENDARY_SEA_CREATURE_WARNING = new LegendarySeaCreatureWarning();
+    private final SpecialZelotAlert SPECIAL_ZELOT_ALERT = new SpecialZelotAlert();
+    private final SummoningEyeAlert SUMMONING_EYE_ALERT = new SummoningEyeAlert();
+    
     private final static Set<String> SOUP_RANDOM_MESSAGES = new HashSet<>(Arrays.asList("I feel like I can fly!", "What was in that soup?",
             "Hmm… tasty!", "Hmm... tasty!", "You can now fly for 2 minutes.", "Your flight has been extended for 2 extra minutes.",
             "You can now fly for 200 minutes.", "Your flight has been extended for 200 extra minutes."));
@@ -198,14 +211,13 @@ public class PlayerListener {
 
             } else if (main.getConfigValues().isEnabled(Feature.SUMMONING_EYE_ALERT) && formattedText.equals("§r§6§lRARE DROP! §r§5Summoning Eye§r")) {
                 main.getUtils().playLoudSound("random.orb", 0.5); // credits to tomotomo, thanks lol
-                main.getRenderListener().setTitleFeature(Feature.SUMMONING_EYE_ALERT);
+                main.getRenderListener().setDisplayedTitle(SUMMONING_EYE_ALERT);
                 main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
 
             } else if (formattedText.equals("§r§aA special §r§5Zealot §r§ahas spawned nearby!§r")) {
                 if (main.getConfigValues().isEnabled(Feature.SPECIAL_ZEALOT_ALERT)) {
                     main.getUtils().playLoudSound("random.orb", 0.5);
-                    main.getRenderListener().setTitleFeature(Feature.SUMMONING_EYE_ALERT);
-                    main.getRenderListener().setTitleFeature(Feature.SPECIAL_ZEALOT_ALERT);
+                    main.getRenderListener().setDisplayedTitle(SPECIAL_ZELOT_ALERT);
                     main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                 }
                 if (main.getConfigValues().isEnabled(Feature.ZEALOT_COUNTER)) {
@@ -216,7 +228,7 @@ public class PlayerListener {
 
             } else if (main.getConfigValues().isEnabled(Feature.LEGENDARY_SEA_CREATURE_WARNING) && LEGENDARY_SEA_CREATURE_MESSAGES.contains(unformattedText)) {
                 main.getUtils().playLoudSound("random.orb", 0.5);
-                main.getRenderListener().setTitleFeature(Feature.LEGENDARY_SEA_CREATURE_WARNING);
+                main.getRenderListener().setDisplayedTitle(LEGENDARY_SEA_CREATURE_WARNING);
                 main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
 
             }  else if (main.getConfigValues().isEnabled(Feature.DISABLE_MAGICAL_SOUP_MESSAGES) && SOUP_RANDOM_MESSAGES.contains(unformattedText)) {
@@ -244,15 +256,14 @@ public class PlayerListener {
             if (main.getConfigValues().isEnabled(Feature.NO_ARROWS_LEFT_ALERT)) {
                 if (NO_ARROWS_LEFT_PATTERN.matcher(formattedText).matches()) {
                     main.getUtils().playLoudSound("random.orb", 0.5);
-                    main.getRenderListener().setSubtitleFeature(Feature.NO_ARROWS_LEFT_ALERT);
-                    main.getRenderListener().setArrowsLeft(-1);
+                    main.getRenderListener().setDisplayedTitle(NO_ARROWS_LEFT_ALERT);
                     main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
 
                 } else if ((matcher = ONLY_HAVE_ARROWS_LEFT_PATTERN.matcher(formattedText)).matches()) {
                     int arrowsLeft = Integer.parseInt(matcher.group("arrows"));
                     main.getUtils().playLoudSound("random.orb", 0.5);
-                    main.getRenderListener().setSubtitleFeature(Feature.NO_ARROWS_LEFT_ALERT);
-                    main.getRenderListener().setArrowsLeft(arrowsLeft);
+                    FEW_ARROWS_LEFT_ALERT.setArrowsRemaining(String.valueOf(arrowsLeft));
+                    main.getRenderListener().setDisplayedTitle(FEW_ARROWS_LEFT_ALERT);
                     main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                 }
             }
@@ -443,7 +454,7 @@ public class PlayerListener {
                     if (now - lastMinionSound > cooldown) {
                         lastMinionSound = now;
                         main.getUtils().playLoudSound("random.pop", 1);
-                        main.getRenderListener().setSubtitleFeature(Feature.MINION_FULL_WARNING);
+                        main.getRenderListener().setDisplayedTitle(MINION_FULL_WARNING);
                         main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                     }
                 } else if (main.getConfigValues().isEnabled(Feature.MINION_STOP_WARNING)) {
@@ -453,10 +464,9 @@ public class PlayerListener {
                         if (now - lastMinionSound > cooldown) {
                             lastMinionSound = now;
                             main.getUtils().playLoudSound("random.orb", 1);
-
                             String mobName = matcher.group("mobName");
-                            main.getRenderListener().setCannotReachMobName(mobName);
-                            main.getRenderListener().setSubtitleFeature(Feature.MINION_STOP_WARNING);
+                            MINION_STOP_WARNING.setType(mobName);
+                            main.getRenderListener().setDisplayedTitle(MINION_STOP_WARNING);
                             main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                         }
                     }
@@ -548,7 +558,7 @@ public class PlayerListener {
                                     foundBoss = true;
                                     if ((lastBoss == -1 || System.currentTimeMillis() - lastBoss > 1800000)) {
                                         lastBoss = System.currentTimeMillis();
-                                        main.getRenderListener().setTitleFeature(Feature.MAGMA_WARNING); // Enable warning and disable again in four seconds.
+                                        main.getRenderListener().setDisplayedTitle(MAGMA_WARNING); // Display Magma Warning
                                         magmaTick = 16; // so the sound plays instantly
                                         main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
 //                                logServer(mc);
@@ -561,8 +571,8 @@ public class PlayerListener {
                                 }
                             }
                         }
-                        if (!foundBoss && main.getRenderListener().getTitleFeature() == Feature.MAGMA_WARNING) {
-                            main.getRenderListener().setTitleFeature(null);
+                        if (!foundBoss) {
+                            main.getRenderListener().clearTitle(MAGMA_WARNING, false);
                         }
                         if (!foundBoss && magmaAccuracy == EnumUtils.MagmaTimerAccuracy.SPAWNED) {
                             magmaAccuracy = EnumUtils.MagmaTimerAccuracy.ABOUT;
@@ -573,7 +583,7 @@ public class PlayerListener {
                             }
                         }
                     }
-                    if (main.getRenderListener().getTitleFeature() == Feature.MAGMA_WARNING && magmaTick % 4 == 0) { // Play sound every 4 ticks or 1/5 second.
+                    if (main.getRenderListener().getDisplayedTitle() != null && main.getRenderListener().getDisplayedTitle().equals(MAGMA_WARNING.getName()) && magmaTick % 4 == 0) { // Play sound every 4 ticks or 1/5 second.
                         main.getUtils().playLoudSound("random.orb", 0.5);
                     }
                 }

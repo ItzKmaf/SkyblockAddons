@@ -388,7 +388,7 @@ public class Utils {
                 if (!triggeredSlayerWarning || (main.getConfigValues().isEnabled(Feature.REPEAT_SLAYER_BOSS_WARNING) && completion != lastCompletion)) {
                     triggeredSlayerWarning = true;
                     main.getUtils().playLoudSound("random.orb", 0.5);
-                    main.getRenderListener().setTitleFeature(Feature.BOSS_APPROACH_ALERT);
+                    main.getRenderListener().setDisplayedTitle(main.getPlayerListener().getBOSS_APPROACH_ALERT());
                     main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                 }
             } else {
