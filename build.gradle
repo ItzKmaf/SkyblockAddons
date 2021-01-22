@@ -41,6 +41,8 @@ repositories {
         name 'JitPack'
         url 'https://jitpack.io'
     }
+    jcenter()
+    maven { url = 'https://files.minecraftforge.net/maven' }
 }
 
 dependencies {
@@ -48,6 +50,7 @@ dependencies {
     implementation('com.github.jagrosh:DiscordIPC:e29d6d8') {
         exclude module: 'log4j'
     }
+
 }
 
 jar {

@@ -41,6 +41,10 @@ public class Text_PickaxeAbilityCooldown implements TextRender, EventListener {
 	@EventHandler
 	public void onChatReceived(ChatReceivedEvent chatReceivedEvent) {
 		if (chatReceivedEvent.getChatMessage().equals("§r§aYou used your §r§6Mining Speed Boost §r§aPickaxe Ability!§r")) {
+			if (!deletedWarn) {
+				SkyblockAddons.getInstance().getRenderListener().clearTitle(title, false);
+				deletedWarn = true;
+			}
 			ItemStack item = mc.thePlayer.getHeldItem();
 			ItemAbility itemAbility = getHeldTool(item);
 			abilityTime = System.currentTimeMillis() + (itemAbility.getAbilityTime(ItemUtils.getItemLore(item)) * 1000);
@@ -56,6 +60,9 @@ public class Text_PickaxeAbilityCooldown implements TextRender, EventListener {
 			ItemAbility itemAbility = getHeldTool(item);
 			abilityTime = System.currentTimeMillis() - (itemAbility.getAbilityTime(ItemUtils.getItemLore(item)) * 1000);
 			cooldownTime = System.currentTimeMillis();
+			shownWarn = true;
+			deletedWarn = false;
+			SkyblockAddons.getInstance().getRenderListener().setDisplayedTitle(title);
 		}
 		
 		
@@ -72,23 +79,9 @@ public class Text_PickaxeAbilityCooldown implements TextRender, EventListener {
 		}
 		lastHeld = System.currentTimeMillis();
 		// Clear Warning if it has been displayed for 2 seconds
-		if (cooldownTime + 2000 < System.currentTimeMillis() && !deletedWarn) {
+		if (cooldownTime + 2000 < System.currentTimeMillis() && !deletedWarn && shownWarn) {
 			deletedWarn = true;
 			SkyblockAddons.getInstance().getRenderListener().clearTitle(title, false);
-		}
-		if (abilityTime > System.currentTimeMillis()) {
-			if (!deletedWarn) {
-				deletedWarn = true;
-				shownWarn = false;
-				SkyblockAddons.getInstance().getRenderListener().clearTitle(title, false);
-			}
-		}
-		if (cooldownTime < System.currentTimeMillis()) {
-			if (!shownWarn) {
-				deletedWarn = false;
-				shownWarn = true;
-				SkyblockAddons.getInstance().getRenderListener().setDisplayedTitle(title);
-			}
 		}
 	}
 	

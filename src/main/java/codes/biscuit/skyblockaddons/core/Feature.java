@@ -3,9 +3,7 @@ package codes.biscuit.skyblockaddons.core;
 import codes.biscuit.skyblockaddons.SkyblockAddons;
 import codes.biscuit.skyblockaddons.gui.Render;
 import codes.biscuit.skyblockaddons.gui.TextRenders.TextRender;
-import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_HealthText;
-import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_ManaText;
-import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_PickaxeAbilityCooldown;
+import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.*;
 import codes.biscuit.skyblockaddons.gui.buttons.ButtonLocation;
 import codes.biscuit.skyblockaddons.utils.objects.IntPair;
 import codes.biscuit.skyblockaddons.utils.EnumUtils;
@@ -46,8 +44,8 @@ public enum Feature {
     HEALTH_BAR(21, Message.SETTING_HEALTH_BAR, new GuiFeatureData(EnumUtils.DrawType.BAR, ColorCode.RED, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -48, -44, 8, 2), true, EnumUtils.FeatureSetting.CHANGE_BAR_COLOR_WITH_POTIONS),
     HEALTH_TEXT(22, Message.SETTING_HEALTH_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.RED, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -66, -46), false, new Text_HealthText()),
     DEFENCE_ICON(23, Message.SETTING_DEFENCE_ICON, new GuiFeatureData(EnumUtils.DrawType.DEFENCE_ICON, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -18), false, EnumUtils.FeatureSetting.USE_VANILLA_TEXTURE),
-    DEFENCE_TEXT(24, Message.SETTING_DEFENCE_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -17), false),
-    DEFENCE_PERCENTAGE(25, Message.SETTING_DEFENCE_PERCENTAGE, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -8), true),
+    DEFENCE_TEXT(24, Message.SETTING_DEFENCE_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -17), false, new Text_DefenceText()),
+    DEFENCE_PERCENTAGE(25, Message.SETTING_DEFENCE_PERCENTAGE, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -8), true, new Text_DefencePercentageText()),
     HEALTH_UPDATES(26, Message.SETTING_HEALTH_UPDATES, new GuiFeatureData(EnumUtils.DrawType.TEXT, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -19, -44), false), // Health updates all credit to DidiSkywalker#9975
     HIDE_PLAYERS_IN_LOBBY(27, Message.SETTING_HIDE_PLAYERS_IN_LOBBY, true),
     DARK_AUCTION_TIMER(28, Message.SETTING_DARK_AUCTION_TIMER, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GOLD, EnumUtils.AnchorPoint.TOP_RIGHT, -26, 28), false, EnumUtils.FeatureSetting.ENABLED_IN_OTHER_GAMES),
@@ -76,7 +74,7 @@ public enum Feature {
     ORGANIZE_ENCHANTMENTS(52, Message.SETTING_ORGANIZE_ENCHANTMENTS, false),
     SHOW_ITEM_COOLDOWNS(53, Message.SETTING_SHOW_ITEM_COOLDOWNS, false),
     SKILL_DISPLAY(54, Message.SETTING_COLLECTION_DISPLAY, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.AQUA, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 0, -66), false),
-    SPEED_PERCENTAGE(55, Message.SETTING_SPEED_PERCENTAGE, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.WHITE, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -110, -11), false),
+    SPEED_PERCENTAGE(55, Message.SETTING_SPEED_PERCENTAGE, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.WHITE, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -110, -11), false, new Text_SpeedPercentageText()),
     ONLY_MINE_ORES_DEEP_CAVERNS(56, Message.SETTING_ONLY_MINE_ORES_DEEP_CAVERNS, new GuiFeatureData(ColorCode.RED, true),true, EnumUtils.FeatureSetting.ENABLE_MESSAGE_WHEN_ACTION_PREVENTED),
     SLAYER_INDICATOR(57, Message.SETTING_SLAYER_INDICATOR, new GuiFeatureData(EnumUtils.DrawType.REVENANT_PROGRESS, ColorCode.AQUA, EnumUtils.AnchorPoint.BOTTOM_RIGHT, -84, -29), true),
     SPECIAL_ZEALOT_ALERT(58, Message.SETTING_SPECIAL_ZEALOT_ALERT, new GuiFeatureData(ColorCode.RED), false),
