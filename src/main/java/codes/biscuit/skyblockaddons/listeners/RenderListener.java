@@ -17,6 +17,7 @@ import codes.biscuit.skyblockaddons.gui.IslandWarpGui;
 import codes.biscuit.skyblockaddons.gui.LocationEditGui;
 import codes.biscuit.skyblockaddons.gui.SettingsGui;
 import codes.biscuit.skyblockaddons.gui.SkyblockAddonsGui;
+import codes.biscuit.skyblockaddons.gui.TextRenders.TextRender;
 import codes.biscuit.skyblockaddons.gui.buttons.ButtonLocation;
 import codes.biscuit.skyblockaddons.gui.titles.Title;
 import codes.biscuit.skyblockaddons.misc.ChromaManager;
@@ -601,6 +602,32 @@ public class RenderListener {
 
         main.getUtils().restoreGLOptions();
     }
+    
+    public void drawTextRender(TextRender textRender, float scale, Minecraft mc, ButtonLocation buttonLocation) {
+        GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        int color = main.getConfigValues().getColor(textRender.getOwner()).getRGB();
+        String text = textRender.getText();
+        if (text == null) {
+            return;
+        }
+        float x = main.getConfigValues().getActualX(textRender.getOwner());
+        float y = main.getConfigValues().getActualY(textRender.getOwner());
+        int height = 7;
+        int width = mc.fontRendererObj.getStringWidth(text);
+        height = textRender.getHeight(height);
+        width = textRender.getWidth(width);
+        x -= width * scale / 2F;
+        y -= height * scale / 2F;
+        x /= scale;
+        y /= scale;
+        if (buttonLocation != null) {
+            buttonLocation.checkHoveredAndDrawBox(x, x + width, y, y + height, scale);
+            GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        }
+        main.getUtils().enableStandardGLOptions();
+        textRender.render(text, x, y, color);
+        main.getUtils().restoreGLOptions();
+    }
 
     /**
      * This renders all the different types gui text elements.
@@ -610,25 +637,7 @@ public class RenderListener {
         String text;
         int color = main.getConfigValues().getColor(feature).getRGB();
         float textAlpha = 1;
-        if (feature == Feature.MANA_TEXT) {
-            text = getAttribute(Attribute.MANA) + "/" + getAttribute(Attribute.MAX_MANA);
-        } else if (feature == Feature.HEALTH_TEXT) {
-            text = getAttribute(Attribute.HEALTH) + "/" + getAttribute(Attribute.MAX_HEALTH);
-        } else if (feature == Feature.DEFENCE_TEXT) {
-            text = String.valueOf(getAttribute(Attribute.DEFENCE));
-        } else if (feature == Feature.DEFENCE_PERCENTAGE) {
-            double doubleDefence = getAttribute(Attribute.DEFENCE);
-            double percentage = ((doubleDefence / 100) / ((doubleDefence / 100) + 1)) * 100; //Taken from https://hypixel.net/threads/how-armor-works-and-the-diminishing-return-of-higher-defence.2178928/
-            BigDecimal bigDecimal = new BigDecimal(percentage).setScale(1, BigDecimal.ROUND_HALF_UP);
-            text = bigDecimal.toString() + "%";
-        } else if (feature == Feature.SPEED_PERCENTAGE) {
-            String walkSpeed = String.valueOf(Minecraft.getMinecraft().thePlayer.capabilities.getWalkSpeed() * 1000);
-            text = walkSpeed.substring(0, Math.min(walkSpeed.length(), 3));
-
-            if (text.endsWith(".")) text = text.substring(0, text.indexOf('.')); //remove trailing periods
-
-            text += "%";
-        } else if (feature == Feature.HEALTH_UPDATES) {
+        if  (feature == Feature.HEALTH_UPDATES) {
             Integer healthUpdate = main.getPlayerListener().getHealthUpdate();
             if (buttonLocation == null) {
                 if (healthUpdate != null) {

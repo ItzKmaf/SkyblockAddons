@@ -7,6 +7,7 @@ import codes.biscuit.skyblockaddons.core.Feature;
 import codes.biscuit.skyblockaddons.core.Location;
 import codes.biscuit.skyblockaddons.core.Message;
 import codes.biscuit.skyblockaddons.core.npc.NPCUtils;
+import codes.biscuit.skyblockaddons.event.io.ChatReceivedEvent;
 import codes.biscuit.skyblockaddons.features.BaitManager;
 import codes.biscuit.skyblockaddons.features.EnchantedItemBlacklist;
 import codes.biscuit.skyblockaddons.features.EndstoneProtectorManager;
@@ -195,7 +196,6 @@ public class PlayerListener {
             e.message = new ChatComponentText(restMessage);
         } else {
             String formattedText = e.message.getFormattedText();
-
             Matcher matcher;
 
             if (main.getRenderListener().isPredictMana() && unformattedText.startsWith("Used ") && unformattedText.endsWith("Mana)")) {
@@ -282,6 +282,7 @@ public class PlayerListener {
                     }
                 }
             }
+            main.getEventBus().fire(new ChatReceivedEvent(formattedText));
         }
     }
 
@@ -420,6 +421,7 @@ public class PlayerListener {
                     timerTick = 1;
                 }
             }
+            main.getEventBus().fire(new codes.biscuit.skyblockaddons.event.io.TickEvent());
         }
     }
 
@@ -925,7 +927,7 @@ public class PlayerListener {
         return actionBarParser.getMaxTickers();
     }
 
-    Integer getHealthUpdate() {
+    public Integer getHealthUpdate() {
         return actionBarParser.getHealthUpdate();
     }
 }

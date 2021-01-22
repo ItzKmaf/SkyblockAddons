@@ -195,7 +195,8 @@
     "reforgeExclusionExample": "e.g. \"odd, clean\"",
     "actionsLeft": "%number% Left",
     "effectActive": "1 Effect Active",
-    "effectsActive": "%number% Effects Active"
+    "effectsActive": "%number% Effects Active",
+    "miningAbilityAvailable": "Mining Ability Available!"
   },
   "discordStatus": {
     "titleNone": "None",

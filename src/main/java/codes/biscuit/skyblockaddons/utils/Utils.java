@@ -2,6 +2,7 @@ package codes.biscuit.skyblockaddons.utils;
 
 import codes.biscuit.skyblockaddons.SkyblockAddons;
 import codes.biscuit.skyblockaddons.core.*;
+import codes.biscuit.skyblockaddons.event.io.SkyblockJoinEvent;
 import codes.biscuit.skyblockaddons.events.SkyblockJoinedEvent;
 import codes.biscuit.skyblockaddons.events.SkyblockLeftEvent;
 import codes.biscuit.skyblockaddons.features.backpacks.Backpack;
@@ -39,6 +40,7 @@ import net.minecraftforge.fml.common.ModContainer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.text.WordUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
 
@@ -187,25 +189,17 @@ public class Utils {
      * @return {@code true} if the player is on Hypixel, {@code false} otherwise
      */
     public boolean isOnHypixel() {
-        final Pattern SERVER_BRAND_PATTERN = Pattern.compile("(.+) <- (?:.+)");
-        final String HYPIXEL_SERVER_BRAND = "BungeeCord (Hypixel)";
 
         Minecraft mc = Minecraft.getMinecraft();
 
         if (!mc.isSingleplayer() && mc.thePlayer.getClientBrand() != null) {
-            Matcher matcher = SERVER_BRAND_PATTERN.matcher(mc.thePlayer.getClientBrand());
-
-            if (matcher.find()) {
-                // Group 1 is the server brand.
-                return matcher.group(1).equals(HYPIXEL_SERVER_BRAND);
-            }
-            else {
-                return false;
+            if (mc.thePlayer.getClientBrand().startsWith("Hypixel BungeeCord (")) {
+                if (mc.thePlayer.getClientBrand().endsWith(") <- vanilla")) {
+                    return true;
+                }
             }
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     private long lastFoundScoreboard = -1;
@@ -241,6 +235,7 @@ public class Utils {
                 // this indicates that he did so.
                 if (foundSkyblockTitle && !this.isOnSkyblock()) {
                     MinecraftForge.EVENT_BUS.post(new SkyblockJoinedEvent());
+                    SkyblockAddons.getInstance().getEventBus().fire(new SkyblockJoinEvent());
                 }
 
                 Collection<Score> scoreboardLines = scoreboard.getSortedScores(sidebarObjective);

@@ -6,6 +6,9 @@ import codes.biscuit.skyblockaddons.config.PersistentValues;
 import codes.biscuit.skyblockaddons.core.Feature;
 import codes.biscuit.skyblockaddons.core.Message;
 import codes.biscuit.skyblockaddons.core.OnlineData;
+import codes.biscuit.skyblockaddons.event.ConcurrentEventBus;
+import codes.biscuit.skyblockaddons.event.EventBus;
+import codes.biscuit.skyblockaddons.event.EventListener;
 import codes.biscuit.skyblockaddons.gui.IslandWarpGui;
 import codes.biscuit.skyblockaddons.gui.SkyblockAddonsGui;
 import codes.biscuit.skyblockaddons.listeners.GuiScreenListener;
@@ -41,7 +44,7 @@ import java.util.*;
 
 @Getter
 @Mod(modid = "skyblockaddons", name = "SkyblockAddons", version = "@VERSION@", clientSideOnly = true, acceptedMinecraftVersions = "@MOD_ACCEPTED@")
-public class SkyblockAddons {
+public class SkyblockAddons implements EventListener {
 
     public static final String MOD_ID = "skyblockaddons";
     public static final String MOD_NAME = "SkyblockAddons";
@@ -67,13 +70,14 @@ public class SkyblockAddons {
     private boolean usingOofModv1;
     @Setter private boolean devMode;
     private List<SkyblockKeyBinding> keyBindings = new LinkedList<>();
+    @Getter private EventBus eventBus = new ConcurrentEventBus();
 
     @Getter private final Set<Integer> registeredFeatureIDs = new HashSet<>();
 
     public SkyblockAddons() {
         instance = this;
         logger = LogManager.getLogger();
-        
+        eventBus.register(this);
         playerListener = new PlayerListener();
         guiScreenListener = new GuiScreenListener();
         renderListener = new RenderListener();

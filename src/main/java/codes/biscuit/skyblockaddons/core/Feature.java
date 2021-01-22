@@ -1,6 +1,11 @@
 package codes.biscuit.skyblockaddons.core;
 
 import codes.biscuit.skyblockaddons.SkyblockAddons;
+import codes.biscuit.skyblockaddons.gui.Render;
+import codes.biscuit.skyblockaddons.gui.TextRenders.TextRender;
+import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_HealthText;
+import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_ManaText;
+import codes.biscuit.skyblockaddons.gui.TextRenders.textRenders.Text_PickaxeAbilityCooldown;
 import codes.biscuit.skyblockaddons.gui.buttons.ButtonLocation;
 import codes.biscuit.skyblockaddons.utils.objects.IntPair;
 import codes.biscuit.skyblockaddons.utils.EnumUtils;
@@ -37,9 +42,9 @@ public enum Feature {
     USE_VANILLA_TEXTURE_DEFENCE(17, Message.SETTING_USE_VANILLA_TEXTURE, true),
     SHOW_BACKPACK_HOLDING_SHIFT(18, Message.SETTING_SHOW_ONLY_WHEN_HOLDING_SHIFT, true),
     MANA_BAR(19, Message.SETTING_MANA_BAR, new GuiFeatureData(EnumUtils.DrawType.BAR, ColorCode.BLUE, EnumUtils.AnchorPoint.BOTTOM_MIDDLE,49, -44, 5, 1), false),
-    MANA_TEXT(20, Message.SETTING_MANA_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.BLUE, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 49, -47), false),
+    MANA_TEXT(20, Message.SETTING_MANA_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.BLUE, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 49, -47), false, new Text_ManaText()),
     HEALTH_BAR(21, Message.SETTING_HEALTH_BAR, new GuiFeatureData(EnumUtils.DrawType.BAR, ColorCode.RED, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -48, -44, 8, 2), true, EnumUtils.FeatureSetting.CHANGE_BAR_COLOR_WITH_POTIONS),
-    HEALTH_TEXT(22, Message.SETTING_HEALTH_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.RED, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -66, -46), false),
+    HEALTH_TEXT(22, Message.SETTING_HEALTH_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.RED, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, -66, -46), false, new Text_HealthText()),
     DEFENCE_ICON(23, Message.SETTING_DEFENCE_ICON, new GuiFeatureData(EnumUtils.DrawType.DEFENCE_ICON, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -18), false, EnumUtils.FeatureSetting.USE_VANILLA_TEXTURE),
     DEFENCE_TEXT(24, Message.SETTING_DEFENCE_TEXT, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -17), false),
     DEFENCE_PERCENTAGE(25, Message.SETTING_DEFENCE_PERCENTAGE, new GuiFeatureData(EnumUtils.DrawType.TEXT, ColorCode.GREEN, EnumUtils.AnchorPoint.BOTTOM_MIDDLE, 114, -8), true),
@@ -119,6 +124,7 @@ public enum Feature {
     CHANGE_ZEALOT_COLOR(96, Message.SETTING_CHANGE_ZEALOT_COLOR, new GuiFeatureData(ColorCode.LIGHT_PURPLE), true),
     HIDE_SVEN_PUP_NAMETAGS(97, Message.SETTING_HIDE_SVEN_PUP_NAMETAGS, true),
     REPEAT_SLAYER_BOSS_WARNING(98, null, true),
+    PICKAXE_ABILITY_COOLDOWN(99, Message.SETTING_PICKAXE_ABILITY_COOLDOWN, new GuiFeatureData(EnumUtils.DrawType.BAIT_LIST_DISPLAY, ColorCode.WHITE, EnumUtils.AnchorPoint.TOP_LEFT, 36, 200), false, new Text_PickaxeAbilityCooldown()),
 
     WARNING_TIME(-1, Message.SETTING_WARNING_DURATION, false),
 
@@ -159,7 +165,7 @@ public enum Feature {
     @Getter private static final Set<Feature> guiFeatures = new LinkedHashSet<>(Arrays.asList(MAGMA_BOSS_TIMER, MANA_BAR, MANA_TEXT, DEFENCE_ICON, DEFENCE_TEXT,
             DEFENCE_PERCENTAGE, HEALTH_BAR, HEALTH_TEXT, SKELETON_BAR, HEALTH_UPDATES, ITEM_PICKUP_LOG, DARK_AUCTION_TIMER, SKILL_DISPLAY, SPEED_PERCENTAGE, SLAYER_INDICATOR,
             POWER_ORB_STATUS_DISPLAY, ZEALOT_COUNTER, TICKER_CHARGES_DISPLAY, TAB_EFFECT_TIMERS, SHOW_TOTAL_ZEALOT_COUNT, SHOW_SUMMONING_EYE_COUNT,
-            SHOW_AVERAGE_ZEALOTS_PER_EYE, BIRCH_PARK_RAINMAKER_TIMER, COMBAT_TIMER_DISPLAY, ENDSTONE_PROTECTOR_DISPLAY, BAIT_LIST));
+            SHOW_AVERAGE_ZEALOTS_PER_EYE, BIRCH_PARK_RAINMAKER_TIMER, COMBAT_TIMER_DISPLAY, ENDSTONE_PROTECTOR_DISPLAY, BAIT_LIST, PICKAXE_ABILITY_COOLDOWN));
 
     private static final int ID_AT_PREVIOUS_UPDATE = 63;
 
@@ -172,6 +178,7 @@ public enum Feature {
     private Message message;
     private List<EnumUtils.FeatureSetting> settings;
     private GuiFeatureData guiFeatureData;
+    private Render render;
     private boolean defaultDisabled;
 
     private static final Set<Integer> ALREADY_REGISTERED_IDS = new HashSet<>();
@@ -189,6 +196,12 @@ public enum Feature {
         } else {
             registeredFeatureIDs.add(id);
         }
+    }
+    
+    
+    Feature(int id, Message settingMessage, GuiFeatureData guiFeatureData, boolean defaultDisabled, Render render) {
+        this(id, settingMessage, guiFeatureData, defaultDisabled);
+        this.render = render;
     }
 
     Feature(int id, Message settingMessage, boolean defaultDisabled, EnumUtils.FeatureSetting... settings) {
@@ -211,6 +224,10 @@ public enum Feature {
         }
         return null;
     }
+    
+    public Render getRender() {
+        return render;
+    }
 
     public boolean isGuiFeature() {
         return guiFeatures.contains(this);
@@ -221,6 +238,15 @@ public enum Feature {
     }
 
     public void draw(float scale, Minecraft mc, ButtonLocation buttonLocation) {
+        // The new Version
+        if (getRender() != null) {
+            SkyblockAddons main = SkyblockAddons.getInstance();
+            if (render instanceof TextRender) {
+                main.getRenderListener().drawTextRender((TextRender) render, scale, mc, buttonLocation);
+            }
+            return;
+        }
+        // Old version
         if (guiFeatureData != null) {
             SkyblockAddons main = SkyblockAddons.getInstance();
             if (guiFeatureData.getDrawType() == EnumUtils.DrawType.BAR) {

@@ -87,6 +87,9 @@ public class ItemUtils {
     }
 
     public static List<String> getItemLore(ItemStack itemStack) {
+        if (itemStack == null) {
+            return (new ArrayList<>(1));
+        }
         if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey("display", 10)) { // 10 -> Compound
             NBTTagCompound display = itemStack.getTagCompound().getCompoundTag("display");
 
